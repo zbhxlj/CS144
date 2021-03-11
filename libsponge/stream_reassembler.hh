@@ -5,16 +5,25 @@
 
 #include <cstdint>
 #include <string>
+#include <list>
+#include <utility>
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
-
+    size_t _lastIndex;
+    //! 将substring按index排序, 保证不重叠
+    //! 可以考虑改用list
+    std::list<std::pair<size_t, std::string> > _unassembledStrings;
+    size_t _unassembledSize;
+    size_t _expectedNextByte;
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
 
+    //! 该函数负责将新的substring加入到_unassembledStrings中, 并且保证里面的substring不重叠(互不相交)
+    void mergeSubstrings(const std::string& data, const size_t index);
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
