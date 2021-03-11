@@ -1,5 +1,9 @@
 #include "byte_stream.hh"
 #include <iostream>
+// #define LOG
+#ifdef LOG
+#include<dbg.h>
+#endif
 using namespace std;
 // Dummy implementation of a flow-controlled in-memory byte stream.
 
@@ -55,6 +59,9 @@ void ByteStream::pop_output(const size_t len) {
 std::string ByteStream::read(const size_t len) {
     auto s = peek_output(len);
     pop_output(len);
+    #ifdef LOG
+    dbg(s);
+    #endif
     return s;
 }
 

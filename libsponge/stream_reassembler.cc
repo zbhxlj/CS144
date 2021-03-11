@@ -32,10 +32,10 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     //! 2.eof为假时, 那就没什么意义
     //? data 为空时候进入后面逻辑可能不方便处理, 这里直接处理掉
     if(data == ""){
-        if(_lastIndex == _expectedNextByte - 1 && _unassembledStrings.empty()){
+        if(_lastIndex == _expectedNextByte - 1){
             _output.end_input();
-            return;
         }
+        return;
         //! 对于第二种情况没做处理
     }
 
@@ -67,6 +67,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         auto front = _unassembledStrings.front();
         if(front.first == _expectedNextByte){
         //! 不必做返回值处理, 因为必定能全部写入
+        _output.write(front.second);
         _expectedNextByte += front.second.size();
         _unassembledStrings.pop_front();
         _unassembledSize -= front.second.size();
@@ -139,7 +140,7 @@ void StreamReassembler::mergeSubstrings(const string& data, const size_t index){
         }
     }
     //! 此时已经插好了, 应当保证capacity, 因为后面只可能转化为unread, 不会减少size
-    size_t outputSize = _capacity - _output.remaining_capacity();
+    size_t outputSize = _output.buffer_size();
     size_t currentSize = outputSize + _unassembledSize;
     if(currentSize <= _capacity) return;
     #ifdef LOG
