@@ -1,7 +1,10 @@
 #include "stream_reassembler.hh"
 #include <assert.h>
 // #define LOG
-
+// #define TEST
+#ifdef TEST
+#include<dbg.h>
+#endif
 #ifdef LOG
 #include <dbg.h>
 #endif
@@ -49,6 +52,13 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         _index = index + overlappedCount;
     }
 
+    #ifdef  TEST
+        dbg("Before function mergeSubstrings");
+        dbg(_index);
+        dbg(_expectedNextByte);
+        dbg(data.size());
+    #endif
+
     #ifdef LOG
         dbg("Before function mergeSubstrings");
         dbg(_data);
@@ -62,10 +72,21 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         dbg(outputSize + _unassembledSize);
     #endif
 
+    #ifdef  TEST
+        dbg("After function mergeSubstrings");
+        dbg(_index);
+        dbg(_expectedNextByte);
+    #endif
+
     
     while(!_unassembledStrings.empty()){
         auto front = _unassembledStrings.front();
         if(front.first == _expectedNextByte){
+        #ifdef TEST
+            dbg(front.first);
+            dbg(front.second.size());
+            dbg(front.second);
+        #endif
         //! 不必做返回值处理, 因为必定能全部写入
         _output.write(front.second);
         _expectedNextByte += front.second.size();
@@ -78,6 +99,12 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         #endif
         }else break;
     }
+
+    #ifdef  TEST
+        dbg("After write");
+        dbg(_expectedNextByte);
+        dbg(_output.peek_output(_output.buffer_size()));
+    #endif
     
     if(_lastIndex == _expectedNextByte -1) _output.end_input();
     return;
@@ -107,7 +134,7 @@ void StreamReassembler::mergeSubstrings(const string& data, const size_t index){
         
 
         for(auto it = _unassembledStrings.begin(); it != _unassembledStrings.end(); it++){
-            auto& currentInterval = *it;
+            auto currentInterval = *it;
             size_t rightIndex = currentInterval.first + currentInterval.second.size() -1; 
             if(index <= rightIndex){
                 size_t dataRightIndex = index + data.size() - 1;
@@ -128,7 +155,15 @@ void StreamReassembler::mergeSubstrings(const string& data, const size_t index){
                     string newData;
                     if(newIndex == index){
                         if(newRightIndex == dataRightIndex) newData = data;
-                        else newData = data.substr(0, data.size() - overlapCount) + currentInterval.second;
+                        else{
+                            #ifdef TEST
+                                dbg(data.size());
+                                dbg(overlapCount);
+                                dbg(currentInterval.second);
+                            #endif
+                            newData = data.substr(0, data.size() - overlapCount) + currentInterval.second;
+                        }
+                        
                     }else {
                         if(newRightIndex == dataRightIndex) newData = currentInterval.second + data.substr(overlapCount);
                         else newData = currentInterval.second;
