@@ -32,14 +32,13 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     
     //! 我认为data为空时候
     //! 1.eof为真时, index的合理值应该是当前发来的所有子串中序号的最大值, 此时负责提供一个eof的信号
-    //! 2.eof为假时, 那就没什么意义
+    //! 2.eof为假时, 那就没什么意义  从lab2来看还是有意义的, 可以发SYN
     //? data 为空时候进入后面逻辑可能不方便处理, 这里直接处理掉
     if(data == ""){
         if(_lastIndex == _expectedNextByte - 1){
             _output.end_input();
         }
         return;
-        //! 对于第二种情况没做处理
     }
 
     //! 处理一下data, 使之不与已经排序的子串重叠
